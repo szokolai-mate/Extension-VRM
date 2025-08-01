@@ -897,9 +897,12 @@ async function audioTalk(blob, character) {
         source.disconnect();
         analyser.disconnect();
         javascriptNode.disconnect();
-        if (current_avatars[character] !== undefined)
-            current_avatars[character]["vrm"].expressionManager.setValue("aa", 0);
-
+        if (current_avatars[character] !== undefined) {
+            //reset all mouth expressions
+            for(const expression of current_avatars[character]["vrm"].expressionManager.mouthExpressionNames) {
+                current_avatars[character]["vrm"].expressionManager.setValue(expression, 0.0);
+            }
+        }
         audio.removeEventListener("ended", endTalk);
         //javascriptNode.removeEventListener("onaudioprocess", onAudioProcess);
     }
@@ -937,16 +940,17 @@ async function audioTalk(blob, character) {
         var vowelmin = 12;
         if(lastUpdate < (Date.now() - LIPS_SYNC_DELAY)) {
             if (current_avatars[character] !== undefined) {
-                // Neutralize all expression in case setExpression called in parrallele
-                for(const expression in current_avatars[character]["vrm"].expressionManager.expressionMap)
-                    current_avatars[character]["vrm"].expressionManager.setValue(expression, Math.min(0.25, current_avatars[character]["vrm"].expressionManager.getValue(expression)));
-
+                // TODO: try to map vowels to audio file
+                // TODO: organic mixing of mouth expressions instead of always using a single one
+                //reset all mouth expressions
+                for(const expression of current_avatars[character]["vrm"].expressionManager.mouthExpressionNames) {
+                    current_avatars[character]["vrm"].expressionManager.setValue(expression, 0.0);
+                }
                 if (inputvolume > (mouththreshold * 2)) {
                     const new_value = ((average - vowelmin) / voweldamp) * (mouthboost/10);
-                    current_avatars[character]["vrm"].expressionManager.setValue("aa", new_value);
-                }
-                else {
-                    current_avatars[character]["vrm"].expressionManager.setValue("aa", 0);
+                    let randomIndex = Math.floor(Math.random() * current_avatars[character]["vrm"].expressionManager.mouthExpressionNames.length)
+                    let expression = current_avatars[character]["vrm"].expressionManager.mouthExpressionNames[randomIndex]
+                    current_avatars[character]["vrm"].expressionManager.setValue(expression, new_value);
                 }
             }
             lastUpdate = Date.now();
