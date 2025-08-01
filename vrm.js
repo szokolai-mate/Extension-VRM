@@ -354,7 +354,9 @@ async function loadModel(model_path) { // Only cache the model if character=null
     } );
 
     // un-T-pose
+    if (vrm.springBoneManager) {
     vrm.springBoneManager.reset();
+    }
     if (vrm.meta?.metaVersion === '1') {
         vrm.humanoid.getNormalizedBoneNode("rightUpperArm").rotation.z = -250;
         vrm.humanoid.getNormalizedBoneNode("rightLowerArm").rotation.z = 0.2;
